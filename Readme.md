@@ -1,5 +1,7 @@
 # Data Types à la Carte
 
+Author: Wouter Swierstra
+
 Presenter: Yuchen Jiang
 
 ## Motivating Problem
@@ -128,4 +130,21 @@ instance {-# OVERLAPPABLE #-} (Functor f, Functor g, Functor h, f :<: g) => f :<
 ```
 
 ## Monads for Free
+
+```haskell
+data Term f a = Pure a
+              | Impure (f (Term f a))
+
+instance Functor f => Functor (Term f) where
+  fmap f (Pure a) = Pure $ f a
+  fmap f (Impure e) = Impure $ fmap (fmap f) e
+instance Functor f => Applicative (Term f) where
+  pure = Pure
+  Pure f <*> x = fmap f x
+  Impure f <*> x = Impure $ fmap (<*> x) f
+instance Functor f => Monad (Term f) where
+  return = pure
+  Pure x >>= f = f x
+  Impure e >>= f = Impure $ fmap (>>= f) e
+```
 
