@@ -1,5 +1,5 @@
 module Main where
-import Syntax
+import Inject
 
 main :: IO ()
 main = do
