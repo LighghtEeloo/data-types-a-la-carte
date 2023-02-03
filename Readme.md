@@ -1,4 +1,4 @@
-# Data Types à la Carte
+# [Data Types à la Carte](https://www.cambridge.org/core/journals/journal-of-functional-programming/article/data-types-a-la-carte/14416CB20C4637164EA9F77097909409)
 
 Author: Wouter Swierstra
 
@@ -109,13 +109,11 @@ class (Functor f) => Eval f where
   eval :: f Int -> Int
 ```
 
-An intuition could be we will only run `eval` on `data Add Int = Add Int Int`, which is just `(+)`, and similar for all `f` passed into `Mu f`.
-
-The reason for the constraint of `Functor f` comes from `cata`.
+The reason for the constraint of `Functor f` comes from `cata`. An intuition could be we will only run `eval` on `data Add Int = Add Int Int`, which is just `(+)`, and similar for all `f` passed into `Mu f`. `cata` will do the rest of the work for us.
 
 ## Injection
 
-To avoid the unsatisfactory constructors, we can use injection.
+To avoid unsatisfactory constructors, we can use injection, which is a way to express the fact that "if we have the ability to build a smaller term in our generalized sum type, we can build the sum type". The injections is expressed in three instances:
 
 ```haskell
 class (Functor sub, Functor sup) => sub :<: sup where
@@ -129,7 +127,28 @@ instance {-# OVERLAPPABLE #-} (Functor f, Functor g, Functor h, f :<: g) => f :<
   inj = Left . inj
 ```
 
+The first instance shows that the injection is reflexive. The last two rules are responsible for the inductive definition of `:<:` over `:+:`. The only structure that the injection needs to penetrate is `Mu`:
+
+```haskell
+inject :: (f :<: g) => f (Mu g) -> Mu g
+inject = In . inj
+```
+
+and we can just prepend `inject $` to any node and get its constructor automatically:
+
+```haskell
+val :: Int -> Expr
+val n = inject $ Val n
+
+add :: Expr -> Expr -> Expr
+add x y = inject $ Add x y
+```
+
+No more lispy `In $ Left $ Right $ Add (In (Left (Left (Val 1)))) (In (Left (Left (Val 1))))` anymore.
+
 ## Monads for Free
+
+As long as a type constructor `f` has type class `Functor` defined, we can get `Monad` for `Term f`.
 
 ```haskell
 data Term f a = Pure a
@@ -148,3 +167,7 @@ instance Functor f => Monad (Term f) where
   Impure e >>= f = Impure $ fmap (>>= f) e
 ```
 
+This is called the **free monad** for two reasons.
+
+1. We can get the monad for free.
+2. The property of this monad is relative to the forgetful functor.
