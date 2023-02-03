@@ -4,6 +4,9 @@ module Cata where
 import Prelude hiding (Either, Left, Right)
 
 newtype Mu f = In (f (Mu f))
+foldExpr :: Functor f => (f a -> a) -> Mu f -> a
+foldExpr f (In e) =
+  f $ fmap (foldExpr f) e
 
 data (a :+: b) e = Left (a e) | Right (b e)
 
