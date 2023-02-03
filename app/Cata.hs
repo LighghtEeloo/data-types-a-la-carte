@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeOperators #-}
 
-module Fold where
+module Cata where
 import Prelude hiding (Either, Left, Right)
 
 newtype Mu f = In (f (Mu f))

@@ -1,6 +1,8 @@
 module Main where
-import Inject
+import Inject(main)
+import FreeRun(main)
 
 main :: IO ()
 main = do
-  print $ evalExpr $ add (val 1) (val 2)
+  Inject.main
+  FreeRun.main

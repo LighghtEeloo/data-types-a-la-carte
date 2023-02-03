@@ -3,7 +3,7 @@
 {-# LANGUAGE FlexibleInstances, FlexibleContexts #-}
 {-# LANGUAGE DeriveFunctor #-}
 
-module Free where
+module FreeRun where
 import Prelude hiding (Either, Left, Right)
 
 data (a :+: b) e = Left (a e) | Right (b e) deriving (Functor)
@@ -62,3 +62,27 @@ tick = do
   x <- recall
   incr 1
   pure x
+
+
+type Reletive a = Int -> (a, Int)
+class (Functor f) => Run f where
+  run :: f (Reletive a) -> Reletive a
+instance (Run f, Run g) => Run (f :+: g) where
+  run (Left x) = run x
+  run (Right x) = run x
+
+instance Run Recall where
+  run (Recall f) i = f i i
+
+instance Run Incr where
+  run (Incr n f) i = f (i + n)
+
+instance Run Clear where
+  run (Clear f) _ = f 0
+
+runTerm :: (Run f) => Term f a -> Reletive a
+runTerm = foldTerm ((,), run)
+
+main :: IO ()
+main = do
+  print $ runTerm (tick :: Term (Recall :+: Incr) Int) 4

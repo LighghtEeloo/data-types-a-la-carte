@@ -4,9 +4,9 @@ module Eval where
 import Prelude hiding (Either, Left, Right)
 
 newtype Mu f = In (f (Mu f))
-fold :: Functor f => (f a -> a) -> Mu f -> a
-fold f (In e) =
-  f $ fmap (fold f) e
+foldExpr :: Functor f => (f a -> a) -> Mu f -> a
+foldExpr f (In e) =
+  f $ fmap (foldExpr f) e
 
 data (a :+: b) e = Left (a e) | Right (b e)
 instance (Functor a, Functor b) => Functor (a :+: b) where
@@ -44,7 +44,7 @@ instance Eval Add where
   eval (Add a b) = a + b
 
 evalExpr :: Expr -> Int
-evalExpr = fold eval
+evalExpr = foldExpr eval
 
 
 
