@@ -4,11 +4,21 @@ Author: Wouter Swierstra
 
 Presenter: Yuchen Jiang
 
+## Setup
+
+This presentation uses `cabal`. To run, simply
+
+```bash
+cabal run
+```
+
+Most titles contain a link to the corresponding Haskell code. Maybe I should try literate programming sometime...
+
 ## Motivating Problem
 
 Suppose we want to represent an AST of a developing language that needs to add nodes incrementally, what approach should we take?
 
-## Good Old Days
+## [Good Old Days](./app/OldDays.hs)
 
 Why not ADTs?
 
@@ -47,7 +57,7 @@ What do we need ADT for representing the AST?
 
 It turns out that we can solve them one by one.
 
-### Catamorphism (Fold)
+### [Catamorphism (Fold)](./app/Cata.hs)
 
 Our first goal is to re-invent recursion. Borrowing the (bad) name from [Fantastic Morphisms and Where to Find Them: A Guide to Recursion Schemes](https://arxiv.org/abs/2202.13633), we can use `catamorphism` to create a fix-point on inductive data types `Mu` that folds an algebra over a term.
 
@@ -60,7 +70,7 @@ cata f (In e) =
 
 Now the only input we need is `f :: * -> *` that takes the `Mu f` itself and returns the node. We'll come back later.
 
-### Either
+### [Either](./app/Cata.hs)
 
 To build an AST, we need to have a generalized `Sum` type - which is `Either`!
 
@@ -98,7 +108,7 @@ eval (In (Right (Add x y))) = eval x + eval y
 
 Still far from satisfactory. So let's hide all the ugly details from the language implementor.
 
-## `Eval` Algebra
+## [`Eval` Algebra](./app/Eval.hs)
 
 The first thing we can notice is that for any "node" in our AST, the evaluation doesn't need to depend on the definition of the `Expr`. Because if there is a field that needs to, it's a recursive call to `eval` the `Expr` part, which has been avoided by `cata`.
 
@@ -111,7 +121,7 @@ class (Functor f) => Eval f where
 
 The reason for the constraint of `Functor f` comes from `cata`. An intuition could be we will only run `eval` on `data Add Int = Add Int Int`, which is just `(+)`, and similar for all `f` passed into `Mu f`. `cata` will do the rest of the work for us.
 
-## Injection
+## [Injection](./app/Inject.hs)
 
 To avoid unsatisfactory constructors, we can use injection, which is a way to express the fact that "if we have the ability to build a smaller term in our generalized sum type, we can build the sum type". The injections is expressed in three instances:
 
@@ -146,7 +156,7 @@ add x y = inject $ Add x y
 
 No more lispy `In $ Left $ Right $ Add (In (Left (Left (Val 1)))) (In (Left (Left (Val 1))))` anymore.
 
-## Monads for Free
+## [Monads for Free](./app/FreeRun.hs)
 
 As long as a type constructor `f` has type class `Functor` defined, we can get `Monad` for `Term f`.
 
