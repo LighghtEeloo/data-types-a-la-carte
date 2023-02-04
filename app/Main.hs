@@ -4,5 +4,7 @@ import FreeRun(main1)
 
 main :: IO ()
 main = do
+  putStrLn "=== Inject ==="
   Inject.main0
+  putStrLn "=== FreeRun ==="
   FreeRun.main1
