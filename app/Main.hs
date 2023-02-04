@@ -1,8 +1,8 @@
 module Main where
-import Inject(main)
-import FreeRun(main)
+import Inject(main0)
+import FreeRun(main1)
 
 main :: IO ()
 main = do
-  Inject.main
-  FreeRun.main
+  Inject.main0
+  FreeRun.main1

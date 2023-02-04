@@ -61,6 +61,6 @@ evalExpr = foldExpr eval
 
 
 
-main :: IO ()
-main = do
+main0 :: IO ()
+main0 = do
   print $ evalExpr $ add (val 1) (val 2)

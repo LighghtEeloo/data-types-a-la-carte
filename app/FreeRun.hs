@@ -83,6 +83,6 @@ instance Run Clear where
 runTerm :: (Run f) => Term f a -> Reletive a
 runTerm = foldTerm ((,), run)
 
-main :: IO ()
-main = do
+main1 :: IO ()
+main1 = do
   print $ runTerm (tick :: Term (Recall :+: Incr) Int) 4
