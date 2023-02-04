@@ -41,18 +41,34 @@ inject :: (f :<: g) => f (Term g a) -> Term g a
 inject = Impure . inj
 
 
+type State a = Int -> (a, Int)
+class (Functor f) => Run f where
+  run :: f (State a) -> State a
+instance (Run f, Run g) => Run (f :+: g) where
+  run (Left x) = run x
+  run (Right x) = run x
+
+runTerm :: (Run f) => Term f a -> State a
+runTerm = foldTerm ((,), run)
+
 
 newtype Recall t = Recall (Int -> t) deriving (Functor)
 recall :: (Recall :<: f) => Term f Int
 recall = inject $ Recall pure
+instance Run Recall where
+  run (Recall f) i = f i i
 
 data Incr t = Incr Int t deriving (Functor)
 incr :: (Incr :<: f) => Int -> Term f ()
 incr n = inject $ Incr n (pure ())
+instance Run Incr where
+  run (Incr n f) i = f (i + n)
 
 newtype Clear t = Clear t deriving (Functor)
 clear :: (Clear :<: f) => Term f ()
 clear = inject $ Clear (pure ())
+instance Run Clear where
+  run (Clear f) _ = f 0
 
 
 
@@ -64,24 +80,6 @@ tick = do
   pure x
 
 
-type Reletive a = Int -> (a, Int)
-class (Functor f) => Run f where
-  run :: f (Reletive a) -> Reletive a
-instance (Run f, Run g) => Run (f :+: g) where
-  run (Left x) = run x
-  run (Right x) = run x
-
-instance Run Recall where
-  run (Recall f) i = f i i
-
-instance Run Incr where
-  run (Incr n f) i = f (i + n)
-
-instance Run Clear where
-  run (Clear f) _ = f 0
-
-runTerm :: (Run f) => Term f a -> Reletive a
-runTerm = foldTerm ((,), run)
 
 main1 :: IO ()
 main1 = do

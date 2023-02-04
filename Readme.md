@@ -156,7 +156,9 @@ add x y = inject $ Add x y
 
 No more lispy `In $ Left $ Right $ Add (In (Left (Left (Val 1)))) (In (Left (Left (Val 1))))` anymore.
 
-## [Monads for Free](./app/FreeRun.hs)
+With all the preparations, we can separate all algebra definitions and all data definitions into different files, and only implement the needed algebras for each data type. We can flexibly combine data type with `:+:` at any time and use the algebra with all required instances defined.
+
+## [Monads for Free](./app/Free.hs)
 
 As long as a type constructor `f` has type class `Functor` defined, we can get `Monad` for `Term f`.
 
@@ -181,3 +183,66 @@ This is called the **free monad** for two reasons.
 
 1. We can get the monad for free.
 2. The property of this monad is relative to the forgetful functor.
+
+## [Encapsulating Side Effects](./app/FreeRun.hs)
+
+We can then use `Term` to characterize side effects via state monads:
+
+```haskell
+type State a = Int -> (a, Int)
+class (Functor f) => Run f where
+  run :: f (State a) -> State a
+instance (Run f, Run g) => Run (f :+: g) where
+  run (Left x) = run x
+  run (Right x) = run x
+
+runTerm :: (Run f) => Term f a -> State a
+runTerm = foldTerm ((,), run)
+```
+
+and later implement some operators:
+
+```haskell
+newtype Recall t = Recall (Int -> t) deriving (Functor)
+recall :: (Recall :<: f) => Term f Int
+recall = inject $ Recall pure
+instance Run Recall where
+  run (Recall f) i = f i i
+
+data Incr t = Incr Int t deriving (Functor)
+incr :: (Incr :<: f) => Int -> Term f ()
+incr n = inject $ Incr n (pure ())
+instance Run Incr where
+  run (Incr n f) i = f (i + n)
+
+newtype Clear t = Clear t deriving (Functor)
+clear :: (Clear :<: f) => Term f ()
+clear = inject $ Clear (pure ())
+instance Run Clear where
+  run (Clear f) _ = f 0
+```
+
+and finally write a program in the DSL we've just defined:
+
+```haskell
+-- tick :: Term (Recall :+: Incr :+: Clear) Int
+tick :: (Recall :<: f, Incr :<: f) => Term f Int
+tick = do
+  x <- recall
+  incr 1
+  pure x
+```
+
+The comment is a concrete typed program, while the actual type annotation is less limited. Though the consequence follows:
+
+```haskell
+main1 :: IO ()
+main1 = do
+  print $ runTerm (tick :: Term (Recall :+: Incr) Int) 4
+```
+
+Our main program will need type annotation to determine which exact implementation to choose.
+
+## Special Thanks
+
+A fantastic [blog](https://iota.huohuo.moe/FreeMonad.html) (in Chinese though) by Niltok (玩火) that goes through the data.
