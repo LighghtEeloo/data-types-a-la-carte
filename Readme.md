@@ -168,7 +168,11 @@ add x y = inject $ Add x y
 
 No more lispy `In $ Left $ Right $ Add (In (Left (Left (Val 1)))) (In (Left (Left (Val 1))))` anymore.
 
-With all the preparations, we can separate all algebra definitions and all data definitions into different files, and only implement the needed algebras for each data type. We can flexibly combine data type with `:+:` at any time and use the algebra with all required instances defined.
+## What have we achieved?
+
+With all the preparations, we can separate all algebra definitions and all data definitions into different files, and only implement the needed algebras for each data type. We can flexibly combine data type with `:+:` at any time and use the algebra with all required instances defined. The powerful flexivity is where this approach gets its name from - it's like ordering pre-deined dishes and combine them as you wish.
+
+The rest of the paper will focus on the famous free monad, the holy grail of monadic operators.
 
 ## [Monads for Free](./app/Free.hs)
 
@@ -257,4 +261,4 @@ Our main program will need type annotation to determine which exact implementati
 
 ## Special Thanks
 
-A fantastic [blog](https://iota.huohuo.moe/FreeMonad.html) (in Chinese though) by Niltok (玩火) that goes through the data.
+A fantastic [blog](https://iota.huohuo.moe/FreeMonad.html) (in Chinese though) by Niltok (玩火) that goes through the main ideas of the paper.
