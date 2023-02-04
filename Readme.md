@@ -121,6 +121,18 @@ class (Functor f) => Eval f where
 
 The reason for the constraint of `Functor f` comes from `cata`. An intuition could be we will only run `eval` on `data Add Int = Add Int Int`, which is just `(+)`, and similar for all `f` passed into `Mu f`. `cata` will do the rest of the work for us.
 
+After the definition of `Eval` we can implement it for all nodes that can be evaluated:
+
+```haskell
+instance Eval Val where
+  eval (Val n) = n
+
+instance Eval Add where
+  eval (Add a b) = a + b
+```
+
+Easy.
+
 ## [Injection](./app/Inject.hs)
 
 To avoid unsatisfactory constructors, we can use injection, which is a way to express the fact that "if we have the ability to build a smaller term in our generalized sum type, we can build the sum type". The injections is expressed in three instances:
