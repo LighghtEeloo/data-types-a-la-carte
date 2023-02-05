@@ -46,7 +46,7 @@ Easy, intuitive and straight forward, but...
   - Can't represent a part of them; have to split to several ADTs
   - `Prelude.undefined`
 - What if there's a new demand that requires side effects?
-  - Have to rewrite most of them into a monad
+  - Have to rewrite most of them into various monads
 
 ## A Quick Inspection
 
@@ -166,13 +166,13 @@ add :: Expr -> Expr -> Expr
 add x y = inject $ Add x y
 ```
 
-No more lispy `In $ Left $ Right $ Add (In (Left (Left (Val 1)))) (In (Left (Left (Val 1))))` anymore.
+No more lispy `In (Left (Right (Add (In (Left (Left (Val 1)))) (In (Left (Left (Val 1)))))))` anymore.
 
 ## What have we achieved?
 
 With all the preparations, we can separate all algebra definitions and all data definitions into different files, and only implement the needed algebras for each data type. We can flexibly combine data type with `:+:` at any time and use the algebra with all required instances defined. The powerful flexivity is where this approach gets its name from - it's like ordering pre-deined dishes and combine them as you wish.
 
-The rest of the paper will focus on the famous free monad, the holy grail of monadic operators.
+The rest of the paper will focus on the famous free monad, the holy grail of monadic operations.
 
 ## [Monads for Free](./app/Free.hs)
 
@@ -258,6 +258,16 @@ main1 = do
 ```
 
 Our main program will need type annotation to determine which exact implementation to choose.
+
+## Final Comments
+
+The discovery of free monads eased a major source of painfulness when writing code in pure functional languages like Haskell - defining different monads all the time. This innovative approach of creating composable monads has established fame for the classical functional pearl paper.
+
+## Lingering Questions
+
+The paper introduced a better way to organize ADTs. What about GADTs?
+
+Does the approach that the author suggested result in performance impact?
 
 ## Special Thanks
 
