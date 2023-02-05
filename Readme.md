@@ -64,11 +64,15 @@ Our first goal is to re-invent recursion. Borrowing the (bad) name from [Fantast
 ```haskell
 newtype Mu f = In (f (Mu f))
 cata :: Functor f => (f a -> a) -> Mu f -> a
-cata f (In e) =
-  f $ fmap (cata f) e
+cata alg (In e) =
+  f $ fmap (cata alg) e
 ```
 
-Now the only input we need is `f :: * -> *` that takes the `Mu f` itself and returns the node. We'll come back later.
+The corresponding commute diagram looks like this:
+
+<img src="./docs/cata.png" alt="cata_diagram" style="width: 30%; left: 35%;" />
+
+Now the only input we need is `f :: * -> *` that takes the `Mu f` itself and returns the node.
 
 ### [Either](./app/Cata.hs)
 
