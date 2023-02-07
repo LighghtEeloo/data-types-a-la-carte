@@ -1,4 +1,5 @@
 (* Reference: https://accu.org/journals/overload/25/142/fletcher_2445 *)
+(* Idea: use abstract class for trait? *)
 
 module type FMap = sig
   type 'node t
